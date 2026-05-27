@@ -1,4 +1,4 @@
-using System.Text;
+﻿using System.Text;
 using SIBManagerAPI.Data;
 using SIBManagerAPI.Helpers;
 using SIBManagerAPI.Services;
@@ -16,6 +16,8 @@ builder.Services.AddDbContext<AppDbContext>(opt =>
 // Servicios
 builder.Services.AddScoped<PagoService>();
 builder.Services.AddScoped<JwtHelper>();
+builder.Services.AddScoped<LogService>();
+builder.Services.AddHttpContextAccessor();
 
 // CORS
 builder.Services.AddCors(options =>
@@ -35,11 +37,11 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     {
         opt.TokenValidationParameters = new TokenValidationParameters
         {
-            ValidateIssuer = false,
-            ValidateAudience = false,
-            ValidateLifetime = true,
+            ValidateIssuer           = false,
+            ValidateAudience         = false,
+            ValidateLifetime         = true,
             ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(
+            IssuerSigningKey         = new SymmetricSecurityKey(
                 Encoding.UTF8.GetBytes(jwtKey)
             )
         };
@@ -54,11 +56,11 @@ builder.Services.AddSwaggerGen(c =>
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "SIB Manager API", Version = "v1" });
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
-        Name = "Authorization",
-        Type = SecuritySchemeType.Http,
-        Scheme = "Bearer",
+        Name         = "Authorization",
+        Type         = SecuritySchemeType.Http,
+        Scheme       = "Bearer",
         BearerFormat = "JWT",
-        In = ParameterLocation.Header
+        In           = ParameterLocation.Header
     });
     c.AddSecurityRequirement(new OpenApiSecurityRequirement
     {{
