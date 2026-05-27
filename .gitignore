@@ -1,0 +1,9 @@
+﻿.vs/
+bin/
+obj/
+*.user
+*.http
+**/appsettings.dev.json
+**/appsettings.Dev.json
+**/appsettings.Development.json
+**/appsettings.Production.json
