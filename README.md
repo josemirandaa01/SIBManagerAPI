@@ -67,8 +67,8 @@ Después de ejecutar el script de base de datos puedes crear un usuario Admin de
 POST /api/auth/registro
 {
   "nombreUsuario": "admin",
-  "email": "admin@empresa.com",
-  "password": "Admin123!",
+  "email": "email@sib.com",
+  "password": "clave",
   "rolId": 1
 }
 ```
