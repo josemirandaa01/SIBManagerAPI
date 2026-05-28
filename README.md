@@ -11,7 +11,7 @@ Backend del sistema de gestión de empleados desarrollado en ASP.NET Core 8 con 
 ## Configuración de la base de datos
 
 1. Abre SQL Server Management Studio (SSMS)
-2. Ejecuta el script `database.sql` incluido en el repositorio
+2. Ejecuta el script `database.sql`
 3. Esto creará la base de datos `GestionEmpleados` con todas las tablas y datos iniciales
 
 ## Configuración del proyecto
