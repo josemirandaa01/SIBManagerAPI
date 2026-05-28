@@ -33,11 +33,11 @@ public class AuthController : ControllerBase
 
         if (usuario == null || !BCrypt.Net.BCrypt.Verify(dto.Password, usuario.PasswordHash))
         {
-            await _log.Warning("LOGIN_FALLIDO", $"Intento de login fallido para: {dto.Email}");
+            await _log.Guardar("LOGIN_FALLIDO", $"Intento de login fallido para: {dto.Email}");
             return Unauthorized(new { mensaje = "Credenciales invalidas" });
         }
 
-        await _log.Info("LOGIN", $"Usuario {dto.Email} inicio sesion correctamente");
+        await _log.Guardar("LOGIN", $"Usuario {dto.Email} inicio sesion correctamente");
 
         return Ok(new
         {
@@ -51,7 +51,7 @@ public class AuthController : ControllerBase
     {
         if (await _db.Usuarios.AnyAsync(u => u.Email == dto.Email))
         {
-            await _log.Warning("REGISTRO_FALLIDO", $"Email ya registrado: {dto.Email}");
+            await _log.Guardar("REGISTRO_FALLIDO", $"Email ya registrado: {dto.Email}");
             return BadRequest(new { mensaje = "El email ya esta registrado" });
         }
 
@@ -66,7 +66,7 @@ public class AuthController : ControllerBase
         _db.Usuarios.Add(usuario);
         await _db.SaveChangesAsync();
 
-        await _log.Info("REGISTRO", $"Nuevo usuario registrado: {dto.Email}");
+        await _log.Guardar("REGISTRO", $"Nuevo usuario registrado: {dto.Email}");
 
         return Ok(new { mensaje = "Usuario creado exitosamente" });
     }

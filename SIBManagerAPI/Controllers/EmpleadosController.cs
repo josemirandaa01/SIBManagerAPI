@@ -50,22 +50,22 @@ public class EmpleadosController : ControllerBase
 
             var lista = await query.ToListAsync();
 
-            await _log.Info("GET_EMPLEADOS", $"Consulta de empleados - {lista.Count} registros encontrados");
+            await _log.Guardar("GET_EMPLEADOS", $"Consulta de empleados - {lista.Count} registros encontrados");
 
             return Ok(lista.Select(e => new
             {
                 e.EmpleadoId,
-                NombreCompleto    = $"{e.PrimerNombre} {e.ApellidoPaterno}".Trim(),
+                NombreCompleto   = $"{e.PrimerNombre} {e.ApellidoPaterno}".Trim(),
                 e.NumeroSeguroSocial,
-                TipoEmpleado      = e.TipoEmpleado?.Nombre,
-                Departamento      = e.Departamento?.Nombre,
+                TipoEmpleado     = e.TipoEmpleado?.Nombre,
+                Departamento     = e.Departamento?.Nombre,
                 e.Estado,
-                PagoCalculado     = _pago.CalcularPago(e)
+                PagoCalculado    = _pago.CalcularPago(e)
             }));
         }
         catch (Exception ex)
         {
-            await _log.Error("GET_EMPLEADOS", "Error al consultar empleados", ex.Message);
+            await _log.Guardar("GET_EMPLEADOS_ERROR", "Error al consultar empleados", ex.Message);
             return StatusCode(500, new { mensaje = "Error interno del servidor" });
         }
     }
@@ -82,11 +82,11 @@ public class EmpleadosController : ControllerBase
 
             if (e == null)
             {
-                await _log.Warning("GET_EMPLEADO", $"Empleado no encontrado - Id: {id}");
+                await _log.Guardar("GET_EMPLEADO_NOTFOUND", $"Empleado no encontrado - Id: {id}");
                 return NotFound();
             }
 
-            await _log.Info("GET_EMPLEADO", $"Consulta de empleado - Id: {id} - {e.PrimerNombre} {e.ApellidoPaterno}");
+            await _log.Guardar("GET_EMPLEADO", $"Consulta de empleado - Id: {id} - {e.PrimerNombre} {e.ApellidoPaterno}");
 
             return Ok(new
             {
@@ -95,9 +95,9 @@ public class EmpleadosController : ControllerBase
                 e.ApellidoPaterno,
                 e.NumeroSeguroSocial,
                 e.TipoEmpleadoId,
-                TipoEmpleado      = e.TipoEmpleado?.Nombre,
+                TipoEmpleado     = e.TipoEmpleado?.Nombre,
                 e.DepartamentoId,
-                Departamento      = e.Departamento?.Nombre,
+                Departamento     = e.Departamento?.Nombre,
                 e.Estado,
                 e.SalarioSemanal,
                 e.SueldoPorHora,
@@ -105,18 +105,18 @@ public class EmpleadosController : ControllerBase
                 e.VentasBrutas,
                 e.TarifaComision,
                 e.SalarioBase,
-                PagoCalculado     = _pago.CalcularPago(e)
+                PagoCalculado    = _pago.CalcularPago(e)
             });
         }
         catch (Exception ex)
         {
-            await _log.Error("GET_EMPLEADO", $"Error al consultar empleado Id: {id}", ex.Message);
+            await _log.Guardar("GET_EMPLEADO_ERROR", $"Error al consultar empleado Id: {id}", ex.Message);
             return StatusCode(500, new { mensaje = "Error interno del servidor" });
         }
     }
 
     [HttpPost]
-    [Authorize(Roles = "Admin,RRHH")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Create(EmpleadoDto dto)
     {
         try
@@ -140,21 +140,21 @@ public class EmpleadosController : ControllerBase
             _db.Empleados.Add(empleado);
             await _db.SaveChangesAsync();
 
-            await _log.Info("CREATE_EMPLEADO",
+            await _log.Guardar("CREATE_EMPLEADO",
                 $"Empleado creado - {dto.PrimerNombre} {dto.ApellidoPaterno} - Cedula: {dto.NumeroSeguroSocial}");
 
             return CreatedAtAction(nameof(GetById), new { id = empleado.EmpleadoId }, empleado);
         }
         catch (Exception ex)
         {
-            await _log.Error("CREATE_EMPLEADO",
+            await _log.Guardar("CREATE_EMPLEADO_ERROR",
                 $"Error al crear empleado - Cedula: {dto.NumeroSeguroSocial}", ex.Message);
             return StatusCode(500, new { mensaje = "Error interno del servidor" });
         }
     }
 
     [HttpPut("{id}")]
-    [Authorize(Roles = "Admin,RRHH")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Update(int id, EmpleadoDto dto)
     {
         try
@@ -166,7 +166,7 @@ public class EmpleadosController : ControllerBase
 
             if (empleado == null)
             {
-                await _log.Warning("UPDATE_EMPLEADO", $"Empleado no encontrado para actualizar - Id: {id}");
+                await _log.Guardar("UPDATE_EMPLEADO_NOTFOUND", $"Empleado no encontrado - Id: {id}");
                 return NotFound(new { mensaje = "Empleado no encontrado" });
             }
 
@@ -192,7 +192,7 @@ public class EmpleadosController : ControllerBase
 
             var pagoNuevo = _pago.CalcularPago(empleado);
 
-            await _log.Info("UPDATE_EMPLEADO",
+            await _log.Guardar("UPDATE_EMPLEADO",
                 $"Empleado actualizado - Id: {id} - {empleado.PrimerNombre} {empleado.ApellidoPaterno}",
                 $"Pago anterior: {pagoAnterior} | Pago nuevo: {pagoNuevo}");
 
@@ -216,7 +216,7 @@ public class EmpleadosController : ControllerBase
         }
         catch (Exception ex)
         {
-            await _log.Error("UPDATE_EMPLEADO", $"Error al actualizar empleado Id: {id}", ex.Message);
+            await _log.Guardar("UPDATE_EMPLEADO_ERROR", $"Error al actualizar empleado Id: {id}", ex.Message);
             return StatusCode(500, new { mensaje = "Error interno del servidor" });
         }
     }
@@ -230,21 +230,21 @@ public class EmpleadosController : ControllerBase
             var empleado = await _db.Empleados.FindAsync(id);
             if (empleado == null)
             {
-                await _log.Warning("DELETE_EMPLEADO", $"Empleado no encontrado para desactivar - Id: {id}");
+                await _log.Guardar("DELETE_EMPLEADO_NOTFOUND", $"Empleado no encontrado - Id: {id}");
                 return NotFound();
             }
 
             empleado.Estado = false;
             await _db.SaveChangesAsync();
 
-            await _log.Info("DELETE_EMPLEADO",
+            await _log.Guardar("DELETE_EMPLEADO",
                 $"Empleado desactivado - Id: {id} - {empleado.PrimerNombre} {empleado.ApellidoPaterno}");
 
             return NoContent();
         }
         catch (Exception ex)
         {
-            await _log.Error("DELETE_EMPLEADO", $"Error al desactivar empleado Id: {id}", ex.Message);
+            await _log.Guardar("DELETE_EMPLEADO_ERROR", $"Error al desactivar empleado Id: {id}", ex.Message);
             return StatusCode(500, new { mensaje = "Error interno del servidor" });
         }
     }
@@ -260,12 +260,12 @@ public class EmpleadosController : ControllerBase
 
             if (e == null)
             {
-                await _log.Warning("GET_PAGO", $"Empleado no encontrado para calculo de pago - Id: {id}");
+                await _log.Guardar("GET_PAGO_NOTFOUND", $"Empleado no encontrado - Id: {id}");
                 return NotFound();
             }
 
             var pago = _pago.CalcularPago(e);
-            await _log.Info("GET_PAGO",
+            await _log.Guardar("GET_PAGO",
                 $"Calculo de pago - Id: {id} - {e.PrimerNombre} {e.ApellidoPaterno} - Pago: {pago}");
 
             return Ok(new
@@ -277,7 +277,7 @@ public class EmpleadosController : ControllerBase
         }
         catch (Exception ex)
         {
-            await _log.Error("GET_PAGO", $"Error al calcular pago Id: {id}", ex.Message);
+            await _log.Guardar("GET_PAGO_ERROR", $"Error al calcular pago Id: {id}", ex.Message);
             return StatusCode(500, new { mensaje = "Error interno del servidor" });
         }
     }
@@ -294,9 +294,9 @@ public class EmpleadosController : ControllerBase
                 .ToListAsync();
 
             var reporte = empleados.Select(e => DetallarPago(e)).ToList();
-            var totalNomina = reporte.Sum(r => (decimal)((dynamic)r).PagoSemanal);
+            var totalNomina = empleados.Sum(e => _pago.CalcularPago(e));
 
-            await _log.Info("REPORTE_SEMANAL",
+            await _log.Guardar("REPORTE_SEMANAL",
                 $"Reporte semanal generado - {empleados.Count} empleados - Total nomina: {totalNomina}");
 
             return Ok(new
@@ -310,7 +310,7 @@ public class EmpleadosController : ControllerBase
         }
         catch (Exception ex)
         {
-            await _log.Error("REPORTE_SEMANAL", "Error al generar reporte semanal", ex.Message);
+            await _log.Guardar("REPORTE_SEMANAL_ERROR", "Error al generar reporte semanal", ex.Message);
             return StatusCode(500, new { mensaje = "Error interno del servidor" });
         }
     }
@@ -320,7 +320,7 @@ public class EmpleadosController : ControllerBase
     public async Task<IActionResult> GetTipos()
     {
         var tipos = await _db.TipoEmpleado.ToListAsync();
-        await _log.Info("GET_TIPOS", "Consulta de tipos de empleado");
+        await _log.Guardar("GET_TIPOS", "Consulta de tipos de empleado");
         return Ok(tipos);
     }
 
@@ -329,7 +329,7 @@ public class EmpleadosController : ControllerBase
     public async Task<IActionResult> GetDepartamentos()
     {
         var deptos = await _db.Departamentos.ToListAsync();
-        await _log.Info("GET_DEPARTAMENTOS", "Consulta de departamentos");
+        await _log.Guardar("GET_DEPARTAMENTOS", "Consulta de departamentos");
         return Ok(deptos);
     }
 
@@ -342,17 +342,17 @@ public class EmpleadosController : ControllerBase
             1 => new { e.EmpleadoId, Nombre = nombre, e.NumeroSeguroSocial,
                 TipoEmpleado = "Asalariado",
                 Departamento = e.Departamento?.Nombre ?? "Sin departamento",
-                Detalle = new { SalarioSemanal = e.SalarioSemanal ?? 0 },
-                PagoSemanal = e.SalarioSemanal ?? 0 },
+                Detalle      = new { SalarioSemanal = e.SalarioSemanal ?? 0 },
+                PagoSemanal  = e.SalarioSemanal ?? 0 },
 
             2 => new { e.EmpleadoId, Nombre = nombre, e.NumeroSeguroSocial,
                 TipoEmpleado = "PorHoras",
                 Departamento = e.Departamento?.Nombre ?? "Sin departamento",
-                Detalle = new {
+                Detalle      = new {
                     SueldoPorHora   = e.SueldoPorHora   ?? 0,
                     HorasTrabajadas = e.HorasTrabajadas  ?? 0,
                     HorasNormales   = Math.Min(e.HorasTrabajadas ?? 0, 40),
-                    HorasExtra      = Math.Max((e.HorasTrabajadas ?? 0) - 40, 0),
+                    HorasExtra      = Math.Max((e.HorasTrabajadas ?? 0) - 40, 0), // horas trabajadas - 40 = horas extras
                     PagoHorasNorm   = (e.SueldoPorHora ?? 0) * Math.Min(e.HorasTrabajadas ?? 0, 40),
                     PagoHorasExtra  = (e.SueldoPorHora ?? 0) * 1.5m * Math.Max((e.HorasTrabajadas ?? 0) - 40, 0)
                 },
@@ -361,7 +361,7 @@ public class EmpleadosController : ControllerBase
             3 => new { e.EmpleadoId, Nombre = nombre, e.NumeroSeguroSocial,
                 TipoEmpleado = "Comision",
                 Departamento = e.Departamento?.Nombre ?? "Sin departamento",
-                Detalle = new {
+                Detalle      = new {
                     VentasBrutas     = e.VentasBrutas   ?? 0,
                     TarifaComision   = e.TarifaComision  ?? 0,
                     TarifaPorcentaje = $"{(e.TarifaComision ?? 0) * 100}%"
@@ -371,7 +371,7 @@ public class EmpleadosController : ControllerBase
             4 => new { e.EmpleadoId, Nombre = nombre, e.NumeroSeguroSocial,
                 TipoEmpleado = "AsalariadoComision",
                 Departamento = e.Departamento?.Nombre ?? "Sin departamento",
-                Detalle = new {
+                Detalle      = new {
                     SalarioBase      = e.SalarioBase    ?? 0,
                     VentasBrutas     = e.VentasBrutas   ?? 0,
                     TarifaComision   = e.TarifaComision  ?? 0,

@@ -22,10 +22,8 @@ public class EmpleadoReporteDto
 
 public class DetalleReporteDto
 {
-    // Asalariado
     public decimal? SalarioSemanal { get; set; }
 
-    // Por Horas
     public decimal? SueldoPorHora { get; set; }
     public decimal? HorasTrabajadas { get; set; }
     public decimal? HorasNormales { get; set; }
@@ -33,12 +31,10 @@ public class DetalleReporteDto
     public decimal? PagoHorasNorm { get; set; }
     public decimal? PagoHorasExtra { get; set; }
 
-    // Comisión
     public decimal? VentasBrutas { get; set; }
     public decimal? TarifaComision { get; set; }
     public string? TarifaPorcentaje { get; set; }
 
-    // Asalariado por Comisión
     public decimal? SalarioBase { get; set; }
     public decimal? Comision { get; set; }
     public decimal? Bonificacion { get; set; }

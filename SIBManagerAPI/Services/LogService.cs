@@ -10,7 +10,7 @@ public class LogService
 
     public LogService(AppDbContext db, IHttpContextAccessor http)
     {
-        _db = db;
+        _db   = db;
         _http = http;
     }
 
@@ -18,30 +18,15 @@ public class LogService
         _http.HttpContext?.User?.FindFirst(
             System.Security.Claims.ClaimTypes.Email)?.Value;
 
-    public async Task Info(string accion, string mensaje, string? detalle = null)
-    {
-        await Guardar(accion, mensaje, detalle);
-    }
-
-    public async Task Error(string accion, string mensaje, string? detalle = null)
-    {
-        await Guardar(accion, mensaje, detalle);
-    }
-
-    public async Task Warning(string accion, string mensaje, string? detalle = null)
-    {
-        await Guardar(accion, mensaje, detalle);
-    }
-
-    private async Task Guardar(string accion, string mensaje, string? detalle)
+    public async Task Guardar(string accion, string mensaje, string? detalle = null)
     {
         var log = new Log
         {
-            Accion = accion,
+            Accion  = accion,
             Mensaje = mensaje,
             Detalle = detalle,
             Usuario = GetUsuario(),
-            Fecha = DateTime.Now
+            Fecha   = DateTime.Now
         };
 
         _db.Logs.Add(log);

@@ -34,12 +34,12 @@ public class UsuariosController : ControllerBase
                     Rol = u.Rol!.Nombre, u.Activo, u.FechaRegistro
                 }).ToListAsync();
 
-            await _log.Info("GET_USUARIOS", $"Consulta de usuarios - {usuarios.Count} registros");
+            await _log.Guardar("GET_USUARIOS", $"Consulta de usuarios - {usuarios.Count} registros");
             return Ok(usuarios);
         }
         catch (Exception ex)
         {
-            await _log.Error("GET_USUARIOS", "Error al consultar usuarios", ex.Message);
+            await _log.Guardar("GET_USUARIOS_ERROR", "Error al consultar usuarios", ex.Message);
             return StatusCode(500, new { mensaje = "Error interno del servidor" });
         }
     }
@@ -55,11 +55,11 @@ public class UsuariosController : ControllerBase
 
             if (usuario == null)
             {
-                await _log.Warning("GET_USUARIO", $"Usuario no encontrado - Id: {id}");
+                await _log.Guardar("GET_USUARIO_NOTFOUND", $"Usuario no encontrado - Id: {id}");
                 return NotFound();
             }
 
-            await _log.Info("GET_USUARIO", $"Consulta de usuario - Id: {id} - {usuario.Email}");
+            await _log.Guardar("GET_USUARIO", $"Consulta de usuario - Id: {id} - {usuario.Email}");
             return Ok(new {
                 usuario.UsuarioId, usuario.NombreUsuario, usuario.Email,
                 Rol = usuario.Rol!.Nombre, usuario.Activo, usuario.FechaRegistro
@@ -67,7 +67,7 @@ public class UsuariosController : ControllerBase
         }
         catch (Exception ex)
         {
-            await _log.Error("GET_USUARIO", $"Error al consultar usuario Id: {id}", ex.Message);
+            await _log.Guardar("GET_USUARIO_ERROR", $"Error al consultar usuario Id: {id}", ex.Message);
             return StatusCode(500, new { mensaje = "Error interno del servidor" });
         }
     }
@@ -79,13 +79,13 @@ public class UsuariosController : ControllerBase
         {
             if (await _db.Usuarios.AnyAsync(u => u.Email == dto.Email))
             {
-                await _log.Warning("CREATE_USUARIO", $"Email ya registrado: {dto.Email}");
+                await _log.Guardar("CREATE_USUARIO_FALLIDO", $"Email ya registrado: {dto.Email}");
                 return BadRequest(new { mensaje = "El email ya esta registrado" });
             }
 
             if (await _db.Usuarios.AnyAsync(u => u.NombreUsuario == dto.NombreUsuario))
             {
-                await _log.Warning("CREATE_USUARIO", $"Nombre de usuario ya existe: {dto.NombreUsuario}");
+                await _log.Guardar("CREATE_USUARIO_FALLIDO", $"Nombre de usuario ya existe: {dto.NombreUsuario}");
                 return BadRequest(new { mensaje = "El nombre de usuario ya existe" });
             }
 
@@ -100,14 +100,14 @@ public class UsuariosController : ControllerBase
             _db.Usuarios.Add(usuario);
             await _db.SaveChangesAsync();
 
-            await _log.Info("CREATE_USUARIO", $"Usuario creado - {dto.Email} - RolId: {dto.RolId}");
+            await _log.Guardar("CREATE_USUARIO", $"Usuario creado - {dto.Email} - RolId: {dto.RolId}");
             return CreatedAtAction(nameof(GetById), new { id = usuario.UsuarioId }, new {
                 usuario.UsuarioId, usuario.NombreUsuario, usuario.Email, usuario.RolId
             });
         }
         catch (Exception ex)
         {
-            await _log.Error("CREATE_USUARIO", $"Error al crear usuario: {dto.Email}", ex.Message);
+            await _log.Guardar("CREATE_USUARIO_ERROR", $"Error al crear usuario: {dto.Email}", ex.Message);
             return StatusCode(500, new { mensaje = "Error interno del servidor" });
         }
     }
@@ -120,13 +120,13 @@ public class UsuariosController : ControllerBase
             var usuario = await _db.Usuarios.FindAsync(id);
             if (usuario == null)
             {
-                await _log.Warning("UPDATE_USUARIO", $"Usuario no encontrado - Id: {id}");
+                await _log.Guardar("UPDATE_USUARIO_NOTFOUND", $"Usuario no encontrado - Id: {id}");
                 return NotFound();
             }
 
             if (await _db.Usuarios.AnyAsync(u => u.Email == dto.Email && u.UsuarioId != id))
             {
-                await _log.Warning("UPDATE_USUARIO", $"Email ya en uso: {dto.Email}");
+                await _log.Guardar("UPDATE_USUARIO_FALLIDO", $"Email ya en uso: {dto.Email}");
                 return BadRequest(new { mensaje = "El email ya esta en uso" });
             }
 
@@ -139,12 +139,12 @@ public class UsuariosController : ControllerBase
 
             await _db.SaveChangesAsync();
 
-            await _log.Info("UPDATE_USUARIO", $"Usuario actualizado - Id: {id} - {dto.Email}");
+            await _log.Guardar("UPDATE_USUARIO", $"Usuario actualizado - Id: {id} - {dto.Email}");
             return NoContent();
         }
         catch (Exception ex)
         {
-            await _log.Error("UPDATE_USUARIO", $"Error al actualizar usuario Id: {id}", ex.Message);
+            await _log.Guardar("UPDATE_USUARIO_ERROR", $"Error al actualizar usuario Id: {id}", ex.Message);
             return StatusCode(500, new { mensaje = "Error interno del servidor" });
         }
     }
@@ -157,19 +157,19 @@ public class UsuariosController : ControllerBase
             var usuario = await _db.Usuarios.FindAsync(id);
             if (usuario == null)
             {
-                await _log.Warning("DELETE_USUARIO", $"Usuario no encontrado - Id: {id}");
+                await _log.Guardar("DELETE_USUARIO_NOTFOUND", $"Usuario no encontrado - Id: {id}");
                 return NotFound();
             }
 
             usuario.Activo = false;
             await _db.SaveChangesAsync();
 
-            await _log.Info("DELETE_USUARIO", $"Usuario desactivado - Id: {id} - {usuario.Email}");
+            await _log.Guardar("DELETE_USUARIO", $"Usuario desactivado - Id: {id} - {usuario.Email}");
             return NoContent();
         }
         catch (Exception ex)
         {
-            await _log.Error("DELETE_USUARIO", $"Error al desactivar usuario Id: {id}", ex.Message);
+            await _log.Guardar("DELETE_USUARIO_ERROR", $"Error al desactivar usuario Id: {id}", ex.Message);
             return StatusCode(500, new { mensaje = "Error interno del servidor" });
         }
     }
@@ -182,19 +182,19 @@ public class UsuariosController : ControllerBase
             var usuario = await _db.Usuarios.FindAsync(id);
             if (usuario == null)
             {
-                await _log.Warning("ACTIVAR_USUARIO", $"Usuario no encontrado - Id: {id}");
+                await _log.Guardar("ACTIVAR_USUARIO_NOTFOUND", $"Usuario no encontrado - Id: {id}");
                 return NotFound();
             }
 
             usuario.Activo = true;
             await _db.SaveChangesAsync();
 
-            await _log.Info("ACTIVAR_USUARIO", $"Usuario activado - Id: {id} - {usuario.Email}");
+            await _log.Guardar("ACTIVAR_USUARIO", $"Usuario activado - Id: {id} - {usuario.Email}");
             return NoContent();
         }
         catch (Exception ex)
         {
-            await _log.Error("ACTIVAR_USUARIO", $"Error al activar usuario Id: {id}", ex.Message);
+            await _log.Guardar("ACTIVAR_USUARIO_ERROR", $"Error al activar usuario Id: {id}", ex.Message);
             return StatusCode(500, new { mensaje = "Error interno del servidor" });
         }
     }
@@ -203,7 +203,7 @@ public class UsuariosController : ControllerBase
     public async Task<IActionResult> GetRoles()
     {
         var roles = await _db.Roles.ToListAsync();
-        await _log.Info("GET_ROLES", "Consulta de roles");
+        await _log.Guardar("GET_ROLES", "Consulta de roles");
         return Ok(roles);
     }
 }
