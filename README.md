@@ -6,7 +6,7 @@ Backend del sistema de gestión de empleados desarrollado en ASP.NET Core 8 con 
 
 - [.NET 8 SDK](https://dotnet.microsoft.com/download)
 - [SQL Server](https://www.microsoft.com/sql-server) o SQL Server Express
-- [Visual Studio 2022](https://visualstudio.microsoft.com/) o VS Code
+- [Visual Studio Community](https://visualstudio.microsoft.com/) o VS Code
 
 ## Configuración de la base de datos
 
@@ -29,7 +29,7 @@ cd SIBManagerAPI
     "DefaultConnection": "Server=localhost;Database=GestionEmpleados;Trusted_Connection=True;TrustServerCertificate=True"
   },
   "Jwt": {
-    "Key": "TU_CLAVE_SECRETA_MINIMO_32_CARACTERES",
+    "Key": "KEY_DE_MAS_DE_32_CARACTERES",
     "Issuer": "SIBManagerAPI",
     "Audience": "SIBManagerCliente",
     "ExpiresInHours": 8
@@ -72,14 +72,6 @@ POST /api/auth/registro
   "rolId": 1
 }
 ```
-
-## Roles disponibles
-
-| RolId | Nombre | Permisos |
-|---|---|---|
-| 1 | Admin | Acceso total |
-| 2 | RRHH | Solo lectura |
-| 3 | Consulta | Solo lectura |
 
 ## Tecnologías
 
